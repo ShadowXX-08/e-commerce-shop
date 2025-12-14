@@ -1,71 +1,244 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
-import { ShoppingCart, LogOut, User } from 'lucide-react';
+import { ShoppingCart, LogOut, User, Menu, X, ShieldCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useContext(AuthContext);
   const { cartItems } = useContext(CartContext);
-  const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  
+  // Hozirgi sahifani aniqlash uchun (Active linkni bo'yash uchun)
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    setMobileOpen(false);
   };
 
+  // Scroll bo'lganda soyani o'zgartirish uchun
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const links = [
+    { name: 'Home', to: '/' },
+    { name: 'Products', to: '/products' },
+  ];
+
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <nav 
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+        scrolled 
+          ? 'bg-white/80 backdrop-blur-md shadow-lg border-b border-white/20' 
+          : 'bg-white/50 backdrop-blur-sm border-b border-transparent'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          <Link to="/" className="text-2xl font-bold text-blue-600">
-            D-SHOP
-          </Link>
-
-          <div className="flex items-center gap-6">
-            <Link to="/" className="text-gray-600 hover:text-blue-600 font-medium">
-              Home
+        <div className="flex justify-between h-20 items-center">
+          
+          {/* --- LOGO --- */}
+          <motion.div
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Link
+              to="/"
+              className="text-3xl font-black tracking-tighter"
+            >
+              <span className="bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 text-transparent bg-clip-text drop-shadow-sm">
+                D-SHOP
+              </span>
             </Link>
+          </motion.div>
 
-            <Link to="/products" className="text-gray-600 hover:text-blue-600 font-medium">
-              Products
-            </Link>
+          {/* --- DESKTOP LINKS --- */}
+          <div className="hidden md:flex items-center gap-8">
+            {links.map((link) => (
+              <Link
+                key={link.name}
+                to={link.to}
+                className="relative group py-2"
+              >
+                <span className={`text-sm font-bold uppercase tracking-wide transition-colors duration-300 ${
+                  location.pathname === link.to ? 'text-blue-600' : 'text-slate-600 hover:text-blue-600'
+                }`}>
+                  {link.name}
+                </span>
+                {/* Hover Line Animation */}
+                <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform transition-transform duration-300 origin-left ${
+                  location.pathname === link.to ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                }`}></span>
+              </Link>
+            ))}
+          </div>
 
+          {/* --- RIGHT SIDE (Cart & Auth) --- */}
+          <div className="hidden md:flex items-center gap-5">
+            
+            {/* Cart Icon */}
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Link to="/cart" className="relative p-0.5 text-slate-600 hover:text-blue-600 transition-colors">
+                <ShoppingCart className="w-6 h-6" />
+                <AnimatePresence>
+                  {cartItems.length > 0 && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      className="absolute -top-1 -right-1 bg-linear-to-r from-pink-500 to-rose-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md border border-white"
+                    >
+                      {cartItems.length}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </Link>
+            </motion.div>
+
+            <div className="w-px h-6 bg-slate-200"></div>
+
+            {/* Auth Section */}
             {isAuthenticated ? (
               <div className="flex items-center gap-4">
                 {user?.isAdmin && (
-                  <Link to="/admin" className="text-sm font-semibold text-blue-600 border border-blue-600 px-3 py-1 rounded hover:bg-blue-50">
-                    Admin
+                  <Link
+                    to="/admin"
+                    className="flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200 hover:bg-amber-100 transition"
+                  >
+                    <ShieldCheck className="w-3 h-3" />
+                    ADMIN
                   </Link>
                 )}
-                <div className="flex items-center gap-2">
-                  <User className="w-5 h-5 text-gray-500" />
-                  <span className="hidden sm:block text-sm font-medium">{user?.name}</span>
+                
+                <div className="flex items-center gap-3 pl-2 pr-1 py-1 rounded-full bg-slate-100 border border-slate-200">
+                  <div className="flex items-center gap-2 pl-2">
+                    <User className="w-4 h-4 text-slate-500" />
+                    <span className="text-sm font-semibold text-slate-700 max-w-[100px] truncate">
+                      {user?.name}
+                    </span>
+                  </div>
+                  <motion.button 
+                    whileHover={{ rotate: 90 }}
+                    onClick={handleLogout} 
+                    className="p-1.5 bg-white text-rose-500 rounded-full shadow-sm hover:text-rose-600 transition"
+                    title="Logout"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </motion.button>
                 </div>
-                <button onClick={handleLogout} className="text-gray-500 hover:text-red-500">
-                  <LogOut className="w-5 h-5" />
-                </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <Link to="/login" className="text-gray-600 hover:text-blue-600 px-3 py-2">Login</Link>
-                <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+              <div className="flex items-center gap-3">
+                <Link 
+                  to="/login" 
+                  className="text-slate-600 font-semibold hover:text-blue-600 transition-colors px-2"
+                >
+                  Login
+                </Link>
+                <Link 
+                  to="/register" 
+                  className="bg-slate-900 text-white px-5 py-2.5 rounded-full font-medium shadow-lg shadow-slate-900/20 hover:bg-slate-800 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+                >
                   Register
                 </Link>
               </div>
             )}
+          </div>
 
-            <Link to="/cart" className="relative text-gray-600 hover:text-blue-600">
-              <ShoppingCart className="w-6 h-6" />
-              {cartItems.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {cartItems.length}
-                </span>
-              )}
+          {/* --- MOBILE MENU BUTTON --- */}
+          <div className="md:hidden flex items-center gap-4">
+             {/* Mobile Cart Icon (Always visible) */}
+             <Link to="/cart" className="relative text-slate-700">
+                <ShoppingCart className="w-6 h-6" />
+                {cartItems.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-rose-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
+                    {cartItems.length}
+                  </span>
+                )}
             </Link>
+
+            <button 
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="p-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
+            >
+              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
         </div>
       </div>
+
+      {/* --- MOBILE MENU DROPDOWN --- */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="md:hidden bg-white/95 backdrop-blur-xl border-t border-slate-100 overflow-hidden shadow-2xl"
+          >
+            <div className="px-6 py-6 space-y-4">
+              {links.map((link) => (
+                <Link
+                  key={link.name}
+                  onClick={() => setMobileOpen(false)}
+                  to={link.to}
+                  className={`block text-lg font-medium ${
+                    location.pathname === link.to ? 'text-blue-600 pl-2 border-l-4 border-blue-600' : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              ))}
+              
+              <div className="border-t border-slate-100 my-4 pt-4">
+                {isAuthenticated ? (
+                  <div className="space-y-4">
+                     <div className="flex items-center gap-3 text-slate-700 font-medium">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                           <User className="w-5 h-5" />
+                        </div>
+                        <div className="flex flex-col">
+                           <span className="text-sm text-slate-400">Welcome back,</span>
+                           <span>{user?.name}</span>
+                        </div>
+                     </div>
+                    
+                    {user?.isAdmin && (
+                      <Link onClick={() => setMobileOpen(false)} to="/admin" className="block w-full text-center text-amber-700 bg-amber-100 py-2 rounded-lg font-semibold">
+                        Admin Panel
+                      </Link>
+                    )}
+                    
+                    <button 
+                      onClick={handleLogout} 
+                      className="w-full flex items-center justify-center gap-2 text-rose-600 bg-rose-50 py-3 rounded-xl font-medium hover:bg-rose-100 transition"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      Logout
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    <Link onClick={() => setMobileOpen(false)} to="/login" className="text-center py-3 rounded-xl bg-slate-100 text-slate-700 font-medium hover:bg-slate-200">
+                      Login
+                    </Link>
+                    <Link onClick={() => setMobileOpen(false)} to="/register" className="text-center py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                      Register
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };
