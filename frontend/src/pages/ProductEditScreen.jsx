@@ -48,8 +48,6 @@ const ProductEditScreen = () => {
 
     try {
       const { data } = await apiService.uploadImage(formData);
-      // Backenddan kelgan yo'lni to'g'irlash (logikani saqlab qoldim)
-      const imageUrl = import.meta.env.VITE_API_URL.replace('/api', '') + data.image;
       setImage(imageUrl);
       toast.success('Image uploaded successfully!');
     } catch (error) {
