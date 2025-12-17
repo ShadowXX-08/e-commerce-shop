@@ -48,7 +48,7 @@ const ProductEditScreen = () => {
 
     try {
       const { data } = await apiService.uploadImage(formData);
-      setImage(imageUrl);
+      setImage(data.image);
       toast.success('Image uploaded successfully!');
     } catch (error) {
       console.error(error);
