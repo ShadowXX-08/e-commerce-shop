@@ -2,18 +2,17 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const helmet = require("helmet");
+const compression = require("compression"); // <-- QO'SHILDI
 const connectDB = require("./config/db");
 const path = require("path");
 
-// Load config
 dotenv.config();
 
-// Connect to Database
 connectDB();
 
 const app = express();
 
-// Middleware
+app.use(compression());
 app.use(cors());
 app.use(
   helmet({
@@ -23,29 +22,15 @@ app.use(
 );
 app.use(express.json());
 
-// Routes
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/products", require("./routes/productRoutes"));
 app.use("/api/orders", require("./routes/orderRoutes"));
 app.use("/api/upload", require("./routes/uploadRoutes"));
 
-// Make uploads folder static
-app.use(
-  "/uploads",
-  express.static(path.join(__dirname, "/uploads"), {
-    setHeaders: (res) => {
-      res.set("Cross-Origin-Resource-Policy", "cross-origin");
-    },
-  })
-);
-
-
-// 404 Handler
 app.use((req, res, next) => {
   res.status(404).json({ message: "Not Found" });
 });
 
-// Error Handler
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   res.status(statusCode);
