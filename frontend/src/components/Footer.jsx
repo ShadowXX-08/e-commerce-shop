@@ -19,7 +19,7 @@ const Footer = () => {
             <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
               Your premium destination for fashion and lifestyle. We bring quality products directly to your doorstep with care.
             </p>
-            
+              
             {/* Social Icons with unique hover colors */}
             <div className="flex space-x-4 pt-2">
               <a href="#" className="group p-2 rounded-full bg-slate-900 hover:bg-blue-600/20 transition-all duration-300">

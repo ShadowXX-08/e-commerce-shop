@@ -14,6 +14,8 @@ import AdminRoute from "./routes/AdminRoute";
 import ProductEditScreen from "./pages/ProductEditScreen";
 import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
+import PlaceOrder from './pages/PlaceOrder';
+import OrderScreen from "./pages/OrderScreen";
 
 function App() {
   return (
@@ -33,8 +35,9 @@ function App() {
 
           <Route element={<ProtectedRoute />}>
             <Route path="/cart" element={<Cart />} />
+             <Route path="/order/:id" element={<OrderScreen />} />
           </Route>
-
+          <Route path="/placeorder" element={<PlaceOrder />} />
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route
