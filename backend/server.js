@@ -20,7 +20,7 @@ app.use(helmet({
 app.use(compression()); 
 
 const allowedOrigins = [
-  "https://e-commerce-shop-front-end.vercel.app",
+  "https://e-commerce-shop-frontend-nine.vercel.app/",
   "http://localhost:5173",
   "http://localhost:3000"
 ];
