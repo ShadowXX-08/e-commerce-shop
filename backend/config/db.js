@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 let cached = global.mongoose;
 
@@ -12,6 +12,7 @@ const connectDB = async () => {
   }
 
   if (!process.env.MONGO_URI) {
+    console.log("Mavjud ENV kalitlari:", Object.keys(process.env));
     throw new Error("MONGO_URI is missing in environment variables");
   }
 
@@ -20,12 +21,14 @@ const connectDB = async () => {
       bufferCommands: true,
     };
 
-    mongoose.set('strictQuery', true);
-    
-    cached.promise = mongoose.connect(process.env.MONGO_URI, opts).then((mongoose) => {
-      console.log(`MongoDB Connected: ${mongoose.connection.host}`);
-      return mongoose;
-    });
+    mongoose.set("strictQuery", true);
+
+    cached.promise = mongoose
+      .connect(process.env.MONGO_URI, opts)
+      .then((mongoose) => {
+        console.log(`MongoDB Connected: ${mongoose.connection.host}`);
+        return mongoose;
+      });
   }
 
   try {
