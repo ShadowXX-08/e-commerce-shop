@@ -1,48 +1,45 @@
+const path = require("path");
 const express = require("express");
 const dotenv = require("dotenv");
 const helmet = require("helmet");
 const compression = require("compression");
+const cors = require("cors");
 const connectDB = require("./config/db");
-const path = require("path");
 
 dotenv.config();
+
 connectDB();
 
 const app = express();
 
-app.use(compression());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false,
+})); 
 
-app.use((req, res, next) => {
-  const allowedOrigins = [
-    "https://e-commerce-shop-front-end.vercel.app",
-    "http://localhost:5173",
-    "http://localhost:3000"
-  ];
-  
-  const origin = req.headers.origin;
+app.use(compression()); 
 
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
+const allowedOrigins = [
+  "https://e-commerce-shop-front-end.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000"
+];
 
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS siyosati bo\'yicha ruxsat berilmadi'));
+    }
+  },
+  credentials: true,
+  methods: "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+  allowedHeaders: "Content-Type, Authorization, X-Requested-With"
+}));
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-
-  next();
-});
-
-app.use(
-  helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-    crossOriginEmbedderPolicy: false,
-  })
-);
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/products", require("./routes/productRoutes"));
@@ -50,11 +47,13 @@ app.use("/api/orders", require("./routes/orderRoutes"));
 app.use("/api/upload", require("./routes/uploadRoutes"));
 
 app.get("/", (req, res) => {
-  res.send("API is running...");
+  res.send("D-Shop API is running...");
 });
 
 app.use((req, res, next) => {
-  res.status(404).json({ message: "Not Found" });
+  const error = new Error(`Topilmadi - ${req.originalUrl}`);
+  res.status(404);
+  next(error);
 });
 
 app.use((err, req, res, next) => {
@@ -68,6 +67,11 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server ${process.env.NODE_ENV} rejimida ${PORT}-portda ishga tushdi`);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.log(`Xatolik: ${err.message}`);
+  server.close(() => process.exit(1));
 });
