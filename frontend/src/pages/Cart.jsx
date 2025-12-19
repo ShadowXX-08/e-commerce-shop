@@ -19,7 +19,7 @@ const Cart = () => {
       toast.error("Please login to proceed to checkout");
       navigate('/login');
     } else {
-      navigate('/shipping'); 
+      navigate('/checkout'); 
     }
   };
 
