@@ -4,6 +4,7 @@ const Order = require('../models/Order');
 // @desc    Create new order
 // @route   POST /api/orders
 // @access  Private
+
 const addOrderItems = asyncHandler(async (req, res) => {
   const {
     orderItems,
@@ -21,9 +22,11 @@ const addOrderItems = asyncHandler(async (req, res) => {
   } else {
     const order = new Order({
       orderItems: orderItems.map((x) => ({
-        ...x,
-        product: x._id,
-        _id: undefined,
+        name: x.name,
+        qty: x.qty,
+        image: x.image,
+        price: x.price,
+        product: x.product || x._id,
       })),
       user: req.user._id,
       shippingAddress,
