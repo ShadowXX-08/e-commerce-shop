@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { User, Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
+import InputField from '../components/InputField';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -14,8 +15,6 @@ const Register = () => {
   });
   
   const [loading, setLoading] = useState(false);
-  
-  // Parol ko'zchalari uchun alohida statelar
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -28,24 +27,26 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-
+    
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match");
-      setLoading(false);
-      return;
+      return toast.error("Passwords do not match");
     }
 
     if (formData.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
-      setLoading(false);
-      return;
+      return toast.error("Password must be at least 6 characters");
     }
 
+    setLoading(true);
+
     try {
-      const result = await register(formData.name, formData.email, formData.password);
+      const result = await register(
+        formData.name.trim(), 
+        formData.email.trim().toLowerCase(), 
+        formData.password
+      );
+
       if (result.success) {
-        toast.success('Account created successfully!');
+        toast.success('Welcome to D-SHOP!');
         navigate('/');
       } else {
         toast.error(result.message || 'Registration failed');
@@ -58,133 +59,112 @@ const Register = () => {
   };
 
   return (
-    // 'pt-28' Navbar balandligini hisobga oladi
     <div className="min-h-screen flex items-center justify-center bg-slate-50 relative overflow-hidden font-sans pt-28 pb-12 px-4">
       
       {/* --- BACKGROUND BLOBS --- */}
-      <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-blue-400/30 rounded-full blur-[100px] animate-pulse"></div>
-      <div className="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-purple-400/30 rounded-full blur-[100px] animate-pulse delay-1000"></div>
+      <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-blue-400/20 rounded-full blur-[100px] animate-pulse"></div>
+      <div className="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-purple-400/20 rounded-full blur-[100px] animate-pulse delay-1000"></div>
 
       {/* --- REGISTER CARD --- */}
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-lg" // max-w-lg (login dagidan sal kengroq)
+        className="w-full max-w-lg relative z-10"
       >
-        <div className="bg-white/80 backdrop-blur-xl p-8 sm:p-10 rounded-3xl shadow-[0_20px_50px_rgba(8,112,184,0.1)] border border-white/50 relative z-10">
+        <div className="bg-white/90 backdrop-blur-xl p-8 sm:p-10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-white">
           
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-black text-slate-900 mb-2">Create Account</h2>
-            <p className="text-slate-500 text-sm">Join D-SHOP today and start shopping.</p>
+            <Link to="/" className="inline-block mb-4">
+               <span className="text-3xl font-black bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 text-transparent bg-clip-text">
+                  D-SHOP
+               </span>
+            </Link>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Create Account</h2>
+            <p className="text-slate-500 text-sm font-medium mt-1">Join our premium fashion community today.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit}>
             
-            {/* 1. Full Name */}
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-slate-700 ml-1">Full Name</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                </div>
-                <input 
-                  type="text" 
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-slate-800 placeholder:text-slate-400"
-                  placeholder="John Doe" 
-                  required 
-                />
-              </div>
-            </div>
+            {/* Full Name */}
+            <InputField
+              label="Full Name"
+              name="name"
+              icon={User}
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="John Doe"
+              required
+            />
 
-            {/* 2. Email Address */}
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-slate-700 ml-1">Email Address</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                </div>
-                <input 
-                  type="email" 
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-slate-800 placeholder:text-slate-400"
-                  placeholder="name@example.com" 
-                  required 
-                />
-              </div>
-            </div>
+            {/* Email Address */}
+            <InputField
+              label="Email Address"
+              type="email"
+              name="email"
+              icon={Mail}
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="name@example.com"
+              required
+            />
 
-            {/* 3. Password (with Toggle) */}
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-slate-700 ml-1">Password</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                </div>
-                <input 
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-slate-800 placeholder:text-slate-400"
-                  placeholder="••••••••" 
-                  required 
-                />
+            {/* Password */}
+            <InputField
+              label="Password"
+              name="password"
+              icon={Lock}
+              type={showPassword ? "text" : "password"}
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="••••••••"
+              required
+              rightElement={
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
+                  className="text-slate-400 hover:text-blue-600 transition-colors"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
-              </div>
-            </div>
+              }
+            />
 
-            {/* 4. Confirm Password (with Toggle) */}
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-slate-700 ml-1">Confirm Password</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <CheckCircle className="h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                </div>
-                <input 
-                  type={showConfirmPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-slate-800 placeholder:text-slate-400"
-                  placeholder="••••••••" 
-                  required 
-                />
+            {/* Confirm Password */}
+            <InputField
+              label="Confirm Password"
+              name="confirmPassword"
+              icon={CheckCircle}
+              type={showConfirmPassword ? "text" : "password"}
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="••••••••"
+              required
+              rightElement={
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
+                  className="text-slate-400 hover:text-blue-600 transition-colors"
                 >
-                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
-              </div>
-            </div>
+              }
+            />
 
             {/* Submit Button */}
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-lg shadow-xl shadow-slate-900/20 hover:bg-blue-600 hover:shadow-blue-600/30 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 mt-2"
+              className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-lg shadow-xl shadow-slate-900/10 hover:bg-blue-600 transition-all duration-300 flex items-center justify-center gap-2 mt-4 disabled:bg-slate-400 disabled:cursor-not-allowed active:scale-[0.98]"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Creating...
+                  Creating Account...
                 </>
               ) : (
                 <>
-                  Register
+                  Register Now
                   <ArrowRight className="w-5 h-5" />
                 </>
               )}
@@ -192,19 +172,18 @@ const Register = () => {
           </form>
 
           {/* Footer */}
-          <div className="mt-8 text-center">
-            <p className="text-sm text-slate-600">
+          <div className="mt-8 text-center space-y-4">
+            <p className="text-sm text-slate-500 font-medium">
               Already have an account?{' '}
-              <Link to="/login" className="text-blue-600 font-bold hover:underline hover:text-blue-700 transition-colors">
-                Login here
+              <Link to="/login" className="text-blue-600 font-black hover:underline transition-colors">
+                Log In
               </Link>
             </p>
-          </div>
-
-          <div className="mt-6 text-center">
-             <p className="text-xs text-slate-400">
-               By creating an account, you agree to our <span className="underline cursor-pointer hover:text-slate-600">Terms & Conditions</span>.
-             </p>
+            <div className="pt-6 border-t border-slate-50">
+               <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold leading-relaxed">
+                 By registering, you agree to our <br/> Terms of Service & Privacy Policy
+               </p>
+            </div>
           </div>
 
         </div>

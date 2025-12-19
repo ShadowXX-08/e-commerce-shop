@@ -6,10 +6,8 @@ const Footer = () => {
     <footer className="bg-slate-950 text-slate-300 border-t border-slate-900 pt-20 pb-10 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* --- MAIN GRID CONTENT --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           
-          {/* 1. Brand Section */}
           <div className="space-y-6">
             <h3 className="text-3xl font-extrabold tracking-tight">
               <span className="bg-linear-to-r from-blue-400 via-purple-500 to-pink-500 text-transparent bg-clip-text">
@@ -20,7 +18,6 @@ const Footer = () => {
               Your premium destination for fashion and lifestyle. We bring quality products directly to your doorstep with care.
             </p>
               
-            {/* Social Icons with unique hover colors */}
             <div className="flex space-x-4 pt-2">
               <a href="#" className="group p-2 rounded-full bg-slate-900 hover:bg-blue-600/20 transition-all duration-300">
                 <Facebook className="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
@@ -34,7 +31,6 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* 2. Quick Links */}
           <div>
             <h4 className="text-white font-bold text-lg mb-6 relative inline-block">
               Quick Links
@@ -60,7 +56,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* 3. Contact Info */}
           <div>
             <h4 className="text-white font-bold text-lg mb-6 relative inline-block">
               Contact Us
@@ -94,7 +89,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* 4. Newsletter */}
           <div>
             <h4 className="text-white font-bold text-lg mb-6 relative inline-block">
               Newsletter
@@ -122,7 +116,6 @@ const Footer = () => {
 
         </div>
 
-        {/* --- BOTTOM BAR --- */}
         <div className="border-t border-slate-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
           <p className="text-slate-500">
             © {new Date().getFullYear()} <span className="text-slate-300 font-semibold">D-SHOP</span>. All rights reserved.

@@ -53,11 +53,11 @@ export const apiService = {
 
   // --- UPLOAD (Rasm yuklash) ---
   uploadImage: (formData) =>
-    api.post("/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }),
+    api.post("/upload", formData, 
+      // {headers: {
+      //   "Content-Type": "multipart/form-data",
+      // },}
+    ),
 };
 
 export default api;

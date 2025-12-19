@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { CartContext } from "../context/CartContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft,
   MapPin,
@@ -8,8 +8,10 @@ import {
   User,
   ChevronRight,
   Globe,
-  Mail 
+  Box,
+  Bookmark
 } from "lucide-react";
+import InputField from "../components/InputField";
 
 const Checkout = () => {
   const { cartItems, getCartTotal, shippingAddress, saveShippingAddress } = useContext(CartContext);
@@ -37,181 +39,174 @@ const Checkout = () => {
   const submitHandler = (e) => {
     e.preventDefault();
     
-    saveShippingAddress(formData);
-    
+    const cleanedData = {
+      fullName: formData.fullName.trim(),
+      address: formData.address.trim(),
+      city: formData.city.trim(),
+      postalCode: formData.postalCode.trim(),
+      country: formData.country.trim(),
+      phone: formData.phone.trim(),
+    };
+
+    saveShippingAddress(cleanedData);
     navigate("/placeorder");
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-28 pb-12 px-4 font-sans">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-slate-50 pt-32 pb-12 px-4 font-sans text-slate-800">
+      <div className="max-w-5xl mx-auto">
         
-        {/* Breadcrumb (Navigatsiya zanjiri) */}
-        <div className="flex items-center gap-2 text-sm text-slate-500 mb-6 font-medium">
-          <button onClick={() => navigate("/cart")} className="hover:text-blue-600 flex items-center gap-1">
-            <ArrowLeft className="w-4 h-4" /> Cart
-          </button>
+        {/* Breadcrumb Navigation */}
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 mb-8">
+          <Link to="/cart" className="hover:text-blue-600 transition-colors">01 Cart</Link>
           <ChevronRight className="w-4 h-4" />
-          <span className="text-slate-900 font-bold">Shipping</span>
+          <span className="text-slate-900">02 Shipping</span>
           <ChevronRight className="w-4 h-4" />
-          <span className="text-slate-400">Place Order</span>
+          <span className="text-slate-300">03 Place Order</span>
         </div>
 
-        <h1 className="text-3xl font-black text-slate-900 mb-8">Shipping Address</h1>
+        <h1 className="text-4xl font-black text-slate-900 mb-10 tracking-tight">Shipping Details</h1>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* --- CHAP TOMON: FORMA --- */}
-          <div className="md:col-span-2">
+        <div className="grid lg:grid-cols-3 gap-10">
+          
+          {/* LEFT: FORM SECTION */}
+          <div className="lg:col-span-2">
             <form
               onSubmit={submitHandler}
-              className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 space-y-6"
+              className="bg-white p-8 rounded-4xl shadow-sm border border-slate-100 space-y-2"
             >
-              <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-blue-600" />
-                Delivery Details
+              <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+                <div className="p-2 bg-blue-50 rounded-lg">
+                  <MapPin className="w-5 h-5 text-blue-600" />
+                </div>
+                Where should we send it?
               </h2>
 
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
                 {/* Full Name */}
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-slate-700">Full Name</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
-                    <input
-                      required
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      placeholder="John Doe"
-                      className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    />
-                  </div>
+                <div className="sm:col-span-2">
+                  <InputField
+                    label="Recipient Name"
+                    name="fullName"
+                    icon={User}
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    placeholder="e.g. John Doe"
+                    required
+                  />
                 </div>
 
                 {/* Address */}
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-slate-700">Address</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
-                    <input
-                      required
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      placeholder="123 Main St, Apartment 4B"
-                      className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    />
-                  </div>
+                <div className="sm:col-span-2">
+                  <InputField
+                    label="Street Address"
+                    name="address"
+                    icon={MapPin}
+                    value={formData.address}
+                    onChange={handleChange}
+                    placeholder="123 Main St, Apartment 4B"
+                    required
+                  />
                 </div>
 
-                {/* City & Phone */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-slate-700">City</label>
-                    <input
-                      required
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      placeholder="Tashkent"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-slate-700">Phone</label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
-                      <input
-                        required
-                        name="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        placeholder="+998 90 123 45 67"
-                        className="w-full pl-10 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-                </div>
+                {/* City */}
+                <InputField
+                  label="City"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  placeholder="Tashkent"
+                  required
+                />
 
-                {/* Postal Code & Country */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-slate-700">Postal Code</label>
-                    <input
-                      required
-                      name="postalCode"
-                      value={formData.postalCode}
-                      onChange={handleChange}
-                      placeholder="100011"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-slate-700">Country</label>
-                    <div className="relative">
-                      <Globe className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
-                      <input
-                        required
-                        name="country"
-                        value={formData.country}
-                        onChange={handleChange}
-                        placeholder="Uzbekistan"
-                        className="w-full pl-10 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-                </div>
+                {/* Phone */}
+                <InputField
+                  label="Contact Number"
+                  name="phone"
+                  type="tel"
+                  icon={Phone}
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="+998"
+                  required
+                />
+
+                {/* Postal Code */}
+                <InputField
+                  label="Zip / Postal Code"
+                  name="postalCode"
+                  icon={Bookmark}
+                  value={formData.postalCode}
+                  onChange={handleChange}
+                  placeholder="100000"
+                  required
+                />
+
+                {/* Country */}
+                <InputField
+                  label="Country"
+                  name="country"
+                  icon={Globe}
+                  value={formData.country}
+                  onChange={handleChange}
+                  placeholder="Uzbekistan"
+                  required
+                />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-blue-600 hover:shadow-blue-500/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-2 mt-4"
+                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-lg shadow-xl shadow-slate-900/20 hover:bg-blue-600 hover:shadow-blue-600/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 mt-6 active:scale-95"
               >
-                Continue to Payment <ChevronRight className="w-5 h-5" />
+                Review Order <ChevronRight className="w-6 h-6" />
               </button>
             </form>
           </div>
 
-          {/* --- O'NG TOMON: CHEK (PREVIEW) --- */}
-          <div className="md:col-span-1">
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 sticky top-32">
-              <h3 className="text-lg font-bold text-slate-900 mb-4">
-                Order Preview
+          {/* RIGHT: ORDER PREVIEW */}
+          <div className="lg:col-span-1">
+            <div className="bg-white p-8 rounded-4xl shadow-sm border border-slate-100 sticky top-32">
+              <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                <Box className="w-5 h-5 text-slate-400" /> Summary
               </h3>
-              <div className="space-y-3 mb-6 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+              
+              <div className="space-y-4 mb-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                 {cartItems.map((item) => (
-                  <div key={item._id} className="flex justify-between text-sm items-center">
+                  <div key={item._id} className="flex justify-between items-center group">
                     <div className="flex items-center gap-3 overflow-hidden">
-                       <img src={item.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-slate-100 border border-slate-100" />
-                       <div className="flex flex-col">
-                         <span className="text-slate-700 font-medium truncate max-w-[120px]">
+                       <img 
+                         src={item.image} 
+                         alt="" 
+                         className="w-12 h-12 rounded-xl object-cover bg-slate-50 border border-slate-50 shrink-0" 
+                       />
+                       <div className="flex flex-col min-w-0">
+                         <span className="text-sm font-bold text-slate-800 truncate">
                            {item.name}
                          </span>
-                         <span className="text-xs text-slate-400">Qty: {item.qty}</span>
+                         <span className="text-xs text-slate-400 font-medium">Qty: {item.qty}</span>
                        </div>
                     </div>
-                    <span className="font-bold text-slate-800 whitespace-nowrap">
+                    <span className="font-black text-slate-900 ml-2">
                       ${(item.price * item.qty).toFixed(2)}
                     </span>
                   </div>
                 ))}
               </div>
               
-              <div className="border-t border-slate-100 pt-4 space-y-2">
-                <div className="flex justify-between items-center text-slate-500 text-sm">
+              <div className="border-t border-slate-50 pt-6 space-y-3">
+                <div className="flex justify-between items-center text-slate-400 font-medium text-sm">
                   <span>Subtotal</span>
-                  <span>${getCartTotal().toFixed(2)}</span>
+                  <span className="text-slate-900 font-bold">${getCartTotal().toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-bold text-slate-900">Total</span>
-                  <span className="text-2xl font-black text-blue-600">
+                <div className="flex justify-between items-center pt-2">
+                  <span className="font-bold text-slate-900">Total Due</span>
+                  <span className="text-3xl font-black text-blue-600">
                     ${getCartTotal().toFixed(2)}
                   </span>
                 </div>
               </div>
-              <p className="text-xs text-slate-400 mt-4 text-center bg-slate-50 py-2 rounded-lg">
-                Shipping & taxes calculated at next step
+              <p className="text-xs text-slate-400 mt-6 text-center bg-slate-50 py-3 rounded-2xl font-medium">
+                Shipping & taxes calculated at review
               </p>
             </div>
           </div>

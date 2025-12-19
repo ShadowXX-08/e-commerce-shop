@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
 import { apiService } from '../services/api';
 import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
 import { 
   MapPin, 
   CreditCard, 
@@ -23,10 +24,9 @@ const PlaceOrder = () => {
 
   const itemsPrice = getCartTotal();
   const shippingPrice = itemsPrice > 100 ? 0 : 10;
-  const taxPrice = Number((itemsPrice * 0.15).toFixed(2)); 
+  const taxPrice = Number((0.15 * itemsPrice).toFixed(2));
   const totalPrice = (Number(itemsPrice) + Number(shippingPrice) + Number(taxPrice)).toFixed(2);
 
-  // --- TEKSHIRUV ---
   useEffect(() => {
     if (!shippingAddress.address) {
       navigate('/checkout');
@@ -35,13 +35,23 @@ const PlaceOrder = () => {
     }
   }, [navigate, shippingAddress, cartItems]);
 
-  // --- BUYURTMA BERISH ---
   const placeOrderHandler = async () => {
     setLoading(true);
     try {
       const orderData = {
-        orderItems: cartItems,
-        shippingAddress: shippingAddress,
+        orderItems: cartItems.map(item => ({
+          name: item.name,
+          qty: item.qty,
+          image: item.image,
+          price: item.price,
+          product: item._id
+        })),
+        shippingAddress: {
+          address: shippingAddress.address,
+          city: shippingAddress.city,
+          postalCode: shippingAddress.postalCode || '123456',
+          country: shippingAddress.country || 'Uzbekistan',
+        },
         paymentMethod: paymentMethod,
         itemsPrice: Number(itemsPrice),
         shippingPrice: Number(shippingPrice),
@@ -53,137 +63,132 @@ const PlaceOrder = () => {
       
       clearCart(); 
       toast.success('Order placed successfully!');
-      navigate(`/order/${data._id}`);
+      navigate('/success', { state: { orderId: data._id } });
       
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || 'Something went wrong');
+      toast.error(error.response?.data?.message || 'Order process failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-28 pb-12 px-4 font-sans">
+    <div className="min-h-screen bg-slate-50 pt-32 pb-12 px-4 font-sans text-slate-800">
       <div className="max-w-6xl mx-auto">
         
-        {/* Breadcrumb / Header */}
-        <div className="flex items-center gap-2 text-sm text-slate-500 mb-8 font-medium">
-          <Link to="/cart" className="hover:text-blue-600">Cart</Link>
+        {/* Breadcrumb Navigation */}
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 mb-8">
+          <Link to="/cart" className="hover:text-blue-600">01 Cart</Link>
           <ChevronRight className="w-4 h-4" />
-          <Link to="/checkout" className="hover:text-blue-600">Shipping</Link>
+          <Link to="/checkout" className="hover:text-blue-600">02 Shipping</Link>
           <ChevronRight className="w-4 h-4" />
-          <span className="text-slate-900 font-bold">Place Order</span>
+          <span className="text-slate-900">03 Place Order</span>
         </div>
 
-        <h1 className="text-3xl font-black text-slate-900 mb-8">Review & Place Order</h1>
+        <h1 className="text-4xl font-black text-slate-900 mb-10 tracking-tight">Final Review</h1>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-10">
           
-          {/* --- LEFT SIDE: INFO --- */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-8">
             
             {/* 1. SHIPPING INFO */}
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-              <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-blue-600" /> Shipping Address
+            <div className="bg-white p-8 rounded-4xl shadow-sm border border-slate-100">
+              <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
+                <div className="p-2 bg-blue-50 rounded-lg"><MapPin className="w-5 h-5 text-blue-600" /></div>
+                Shipping Destination
               </h2>
-              <div className="text-slate-600 ml-7 space-y-1">
-                <p className="font-medium text-slate-900">{shippingAddress.fullName}</p>
-                <p>{shippingAddress.address}, {shippingAddress.city}</p>
-                <p>Phone: {shippingAddress.phone}</p>
+              <div className="grid sm:grid-cols-2 gap-6 text-slate-600">
+                 <div>
+                    <p className="text-xs font-bold uppercase text-slate-400 mb-1">Customer</p>
+                    <p className="font-bold text-slate-900">{shippingAddress.fullName || "Guest User"}</p>
+                    <p className="text-sm">{shippingAddress.phone}</p>
+                 </div>
+                 <div>
+                    <p className="text-xs font-bold uppercase text-slate-400 mb-1">Address</p>
+                    <p className="font-bold text-slate-900">{shippingAddress.address}</p>
+                    <p className="text-sm">{shippingAddress.city}, {shippingAddress.postalCode || ''}</p>
+                 </div>
               </div>
             </div>
 
-            {/* 2. PAYMENT METHOD */}
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-              <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-blue-600" /> Payment Method
+            {/* 2. PAYMENT */}
+            <div className="bg-white p-8 rounded-4xl shadow-sm border border-slate-100">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-3">
+                <div className="p-2 bg-emerald-50 rounded-lg"><CreditCard className="w-5 h-5 text-emerald-600" /></div>
+                Payment Method
               </h2>
-              <div className="text-slate-600 ml-7">
-                Method: <span className="font-bold text-slate-900">{paymentMethod}</span>
-              </div>
+              <p className="text-slate-600 ml-11">
+                Preferred method: <span className="font-black text-slate-900 uppercase">{paymentMethod}</span>
+              </p>
             </div>
 
             {/* 3. ORDER ITEMS */}
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-              <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <Package className="w-5 h-5 text-blue-600" /> Order Items
+            <div className="bg-white p-8 rounded-4xl shadow-sm border border-slate-100">
+              <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
+                <div className="p-2 bg-purple-50 rounded-lg"><Package className="w-5 h-5 text-purple-600" /></div>
+                Review Items
               </h2>
               <div className="space-y-4">
-                {cartItems.length === 0 ? (
-                  <div className="text-center p-4 bg-slate-50 rounded-xl text-slate-500">
-                    Your cart is empty
-                  </div>
-                ) : (
-                  cartItems.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between border-b border-slate-100 last:border-0 pb-4 last:pb-0">
-                      <div className="flex items-center gap-4">
-                        <img 
-                          src={item.image} 
-                          alt={item.name} 
-                          className="w-16 h-16 object-cover rounded-xl border border-slate-200"
-                        />
-                        <div>
-                          <Link to={`/product/${item._id}`} className="font-semibold text-slate-900 hover:text-blue-600 transition-colors block">
-                            {item.name}
-                          </Link>
-                          <p className="text-slate-500 text-sm">
-                            {item.qty} x ${item.price} = <span className="font-bold text-slate-900">${(item.qty * item.price).toFixed(2)}</span>
-                          </p>
-                        </div>
+                {cartItems.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between py-4 border-b border-slate-50 last:border-0">
+                    <div className="flex items-center gap-4">
+                      <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded-2xl border border-slate-100" />
+                      <div>
+                        <Link to={`/products/${item._id}`} className="font-bold text-slate-900 hover:text-blue-600 transition-colors">
+                          {item.name}
+                        </Link>
+                        <p className="text-sm text-slate-500 font-medium">{item.qty} units x ${item.price}</p>
                       </div>
                     </div>
-                  ))
-                )}
+                    <span className="font-black text-slate-900">${(item.qty * item.price).toFixed(2)}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
           </div>
 
-          {/* --- RIGHT SIDE: SUMMARY --- */}
+          {/* RIGHT SIDE: SUMMARY */}
           <div className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 sticky top-28">
-              <h3 className="text-xl font-bold text-slate-900 mb-6">Order Summary</h3>
+            <div className="bg-slate-900 text-white p-8 rounded-[2.5rem] shadow-2xl sticky top-32">
+              <h3 className="text-2xl font-black mb-8">Billing Summary</h3>
               
-              <div className="space-y-3 text-sm border-b border-slate-100 pb-6 mb-6">
+              <div className="space-y-4 mb-8 text-slate-400 font-medium">
                 <div className="flex justify-between">
-                  <span className="text-slate-600">Items Price</span>
-                  <span className="font-semibold">${addDecimals(itemsPrice)}</span>
+                  <span>Subtotal</span>
+                  <span className="text-white">${addDecimals(itemsPrice)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">Shipping</span>
-                  <span className="font-semibold">
-                    {shippingPrice === 0 ? <span className="text-green-600">Free</span> : `$${shippingPrice}`}
+                  <span>Shipping Cost</span>
+                  <span className="text-emerald-400 font-bold">
+                    {shippingPrice === 0 ? "FREE" : `$${shippingPrice.toFixed(2)}`}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">Tax (15%)</span>
-                  <span className="font-semibold">${taxPrice}</span>
+                  <span>Tax (15%)</span>
+                  <span className="text-white">${taxPrice}</span>
+                </div>
+                <div className="pt-6 border-t border-white/10 flex justify-between items-center">
+                  <span className="text-xl font-bold text-white">Grand Total</span>
+                  <span className="text-3xl font-black text-blue-400">${totalPrice}</span>
                 </div>
               </div>
 
-              <div className="flex justify-between items-center mb-8">
-                <span className="text-lg font-bold text-slate-900">Total</span>
-                <span className="text-2xl font-black text-blue-600">${totalPrice}</span>
-              </div>
-
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6 flex items-start gap-2">
-                 <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                 <p className="text-xs text-amber-800 font-medium">
-                   This is a demo store. No real payments will be processed.
+              <div className="bg-white/5 rounded-2xl p-4 mb-8 flex items-start gap-3 border border-white/10">
+                 <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                 <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
+                   DEMO MODE: No real funds will be deducted. By clicking "Place Order", you agree to our terms.
                  </p>
               </div>
 
               <button
-                type="button"
-                className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-blue-600 hover:shadow-blue-500/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-2 disabled:bg-slate-300 disabled:cursor-not-allowed"
                 disabled={cartItems.length === 0 || loading}
                 onClick={placeOrderHandler}
+                className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-blue-600/20 hover:bg-blue-500 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 disabled:bg-slate-700 disabled:cursor-not-allowed active:scale-95"
               >
-                {loading ? <Loader2 className="animate-spin" /> : "Place Order"}
+                {loading ? <Loader2 className="animate-spin w-6 h-6" /> : "COMPLETE ORDER"}
               </button>
-
             </div>
           </div>
 

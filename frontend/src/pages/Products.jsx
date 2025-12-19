@@ -2,25 +2,18 @@ import { useEffect, useState } from 'react';
 import { apiService } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, SlidersHorizontal, PackageX, Loader2 } from 'lucide-react';
+import { Search, SlidersHorizontal, PackageX, Loader2, X } from 'lucide-react'; 
 
 const Products = () => {
-  // 1. ASL NUSXA (Bunga hech qachon filter ishlatib setAllProducts demang!)
   const [allProducts, setAllProducts] = useState([]);
-  
-  // 2. Loading holati
   const [loading, setLoading] = useState(true);
-  
-  // 3. Qidiruv so'zi
   const [searchTerm, setSearchTerm] = useState('');
 
-  // --- MA'LUMOT OLISH ---
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const { data } = await apiService.getProducts();
-        // Backenddan kelgan ma'lumotni 'allProducts'ga saqlaymiz
-        setAllProducts(data.products || data);
+        setAllProducts(data.products || []);
       } catch (error) {
         console.error("Error fetching products", error);
       } finally {
@@ -30,15 +23,11 @@ const Products = () => {
     fetchProducts();
   }, []);
 
-  // --- FILTER MANTIG'I ---
-  // Bu yerda 'allProducts' asosida yangi ro'yxat yasaymiz. 
-  // 'allProducts' o'zgarmaydi, shuning uchun o'chirganda ma'lumot joyiga qaytadi.
   const displayedProducts = allProducts.filter((product) => {
-    if (!searchTerm) return true; // Input bo'sh bo'lsa, hammasini qaytar
+    if (!searchTerm) return true;
     return product.name?.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
-  // Animatsiya variantlari
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -58,38 +47,39 @@ const Products = () => {
         
         {/* --- HEADER --- */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
-          <div>
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }} 
+            animate={{ opacity: 1, x: 0 }}
+          >
             <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">
               New Arrivals
             </h2>
             <p className="text-slate-500 mt-2">
               Discover the latest trends in our collection
             </p>
-          </div>
+          </motion.div>
 
           {/* Search & Filter UI */}
           <div className="flex w-full md:w-auto gap-3">
-            <div className="relative flex-1 md:w-64">
+            <div className="relative flex-1 md:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
               <input 
                 type="text" 
                 placeholder="Search products..." 
                 value={searchTerm}
-                // Input o'zgarganda faqat searchTerm o'zgaradi
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm"
+                className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm"
               />
-              {/* O'chirish (X) tugmasi - qulaylik uchun */}
               {searchTerm && (
                 <button 
                   onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 transition-colors"
                 >
-                  <PackageX className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               )}
             </div>
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm">
+            <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm active:scale-95">
               <SlidersHorizontal className="w-5 h-5" />
               <span className="hidden sm:inline font-medium">Filter</span>
             </button>
@@ -98,41 +88,45 @@ const Products = () => {
 
         {/* --- CONTENT --- */}
         {loading ? (
-          // Loading Skeleton
-          <div className="flex justify-center items-center h-64">
-             <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+          <div className="flex flex-col justify-center items-center h-80">
+             <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
+             <p className="text-slate-400 animate-pulse">Loading products...</p>
           </div>
         ) : (
           <>
-             {/* Natija yo'q bo'lsa */}
              {displayedProducts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400">
-                    <PackageX className="w-10 h-10" />
+                <motion.div 
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }}
+                  className="flex flex-col items-center justify-center py-20 text-center"
+                >
+                  <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300">
+                    <PackageX className="w-12 h-12" />
                   </div>
                   <h3 className="text-xl font-bold text-slate-800 mb-2">No products found</h3>
-                  <p className="text-slate-500 max-w-md">
-                    We couldn't find any products matching "{searchTerm}".
+                  <p className="text-slate-500 max-w-md mb-6">
+                    We couldn't find any products matching <span className="font-bold text-slate-900">"{searchTerm}"</span>.
                   </p>
-                </div>
+                  <button 
+                    onClick={() => setSearchTerm('')}
+                    className="text-blue-600 font-semibold hover:underline"
+                  >
+                    Clear all search
+                  </button>
+                </motion.div>
              ) : (
-               // Bor bo'lsa - ro'yxatni chiqaramiz
-               // AnimatePresence va layout prop - silliq o'zgarish uchun
                <motion.div 
-                 layout
                  variants={containerVariants}
                  initial="hidden"
                  animate="visible"
                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
                >
-                 <AnimatePresence>
+                 <AnimatePresence mode="popLayout">
                    {displayedProducts.map((product) => (
                      <motion.div 
                        layout
                        key={product._id} 
                        variants={itemVariants}
-                       initial="hidden" 
-                       animate="visible" 
                        exit={{ opacity: 0, scale: 0.9 }}
                      >
                         <ProductCard product={product} />
