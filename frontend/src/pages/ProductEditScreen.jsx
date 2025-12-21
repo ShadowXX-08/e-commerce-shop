@@ -90,7 +90,7 @@ const ProductEditScreen = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-28 pb-12 px-4 font-sans text-slate-800">
+    <div className="min-h-screen bg-slate-50 pt-28 pb-12 px-4 font-sans text-slate-800 overflow-x-hidden">
       <div className="max-w-6xl mx-auto">
         
         {/* Header */}
@@ -111,7 +111,7 @@ const ProductEditScreen = () => {
           
           {/* LEFT COLUMN: IMAGE PREVIEW & UPLOAD */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-200">
+            <div className="bg-white p-4 md:p-6 rounded-[2.5rem] shadow-sm border border-slate-200">
               <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
                 <ImageIcon className="w-5 h-5 text-blue-500" /> Media Assets
               </h3>
@@ -148,7 +148,7 @@ const ProductEditScreen = () => {
 
           {/* RIGHT COLUMN: FORM DETAILS */}
           <div className="lg:col-span-2">
-            <form onSubmit={submitHandler} className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200 space-y-2">
+            <form onSubmit={submitHandler} className="bg-white p-4 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-200 space-y-2">
               
               <div className="grid md:grid-cols-2 gap-x-6">
                 {/* Name */}
@@ -221,7 +221,7 @@ const ProductEditScreen = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-end items-center gap-4 pt-4">
+              <div className="flex flex-wrap justify-end items-center gap-4 pt-4">
                 <button 
                   type="button" 
                   onClick={() => navigate(-1)} 
