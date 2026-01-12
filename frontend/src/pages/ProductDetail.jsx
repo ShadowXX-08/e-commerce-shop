@@ -3,10 +3,10 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { apiService } from '../services/api';
 import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext'; 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { 
-  ArrowLeft, Star, ShoppingCart, Heart, 
+  ArrowLeft, Star, ShoppingCart, 
   Minus, Plus, Truck, ShieldCheck, RefreshCcw, Send
 } from 'lucide-react';
 
@@ -14,17 +14,19 @@ const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useContext(CartContext);
-  const { user, isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated } = useContext(AuthContext);
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState('M');
-  const [isWishlisted, setIsWishlisted] = useState(false);
-
+  
+  const [selectedSize, setSelectedSize] = useState('M'); 
+  
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+
+  const availableSizes = ['S', 'M', 'L', 'XL', '2XL']; 
 
   useEffect(() => {
     fetchProductData();
@@ -45,8 +47,10 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (product.countInStock > 0) {
-      addToCart(product, quantity);
-      toast.success(`${quantity} x ${product.name} added to cart!`);
+      const productToAdd = { ...product, size: selectedSize };
+      
+      addToCart(productToAdd, quantity);
+      toast.success(`${quantity} x ${product.name} (Size: ${selectedSize}) added!`);
     }
   };
 
@@ -138,6 +142,34 @@ const ProductDetail = () => {
             <div className="text-4xl font-bold mb-6">${product.price?.toLocaleString()}</div>
 
             <p className="text-slate-600 text-lg leading-relaxed mb-8">{product.description}</p>
+
+            {/* --- NEW: SIZE SELECTOR --- */}
+            <div className="mb-8">
+                <div className="flex justify-between items-end mb-3">
+                    <span className="text-sm font-bold text-slate-900">
+                        Size: <span className="font-normal text-slate-500">{selectedSize}</span>
+                    </span>
+                </div>
+                
+                <div className="flex flex-wrap gap-3">
+                    {availableSizes.map((size) => (
+                    <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={`
+                        h-12 min-w-[3rem] px-4 rounded-xl border font-bold text-sm transition-all duration-200 flex items-center justify-center
+                        ${selectedSize === size
+                            ? 'bg-slate-900 text-white border-slate-900 shadow-lg scale-105'
+                            : 'bg-white text-slate-600 border-slate-200 hover:border-blue-500 hover:text-blue-600' 
+                        }
+                        `}
+                    >
+                        {size}
+                    </button>
+                    ))}
+                </div>
+            </div>
+            {/* ------------------------- */}
 
             {/* STOCK STATUS */}
             <div className="mb-8">
